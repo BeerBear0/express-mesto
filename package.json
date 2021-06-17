@@ -1,0 +1,33 @@
+{
+  "name": "express-mesto",
+  "version": "1.0.0",
+  "description": "`/routes` — папка с файлами роутера  \r `/controllers` — папка с файлами контроллеров пользователя и карточки   \r `/models` — папка с файлами описания схем пользователя и карточки",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "lint": "npx eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeerBear0/express-mesto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BeerBear0/express-mesto/issues"
+  },
+  "homepage": "https://github.com/BeerBear0/express-mesto#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.12.14"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.27.0",
+    "eslint": "^7.28.0",
+    "eslint-plugin-react": "^7.24.0",
+    "nodemon": "^2.0.7"
+  }
+}
