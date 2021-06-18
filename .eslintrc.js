@@ -4,9 +4,13 @@ module.exports = {
     es2021: true,
   },
   extends: [
-    'plugin:react/recommended',
-    'airbnb',
+    'eslint:recommended',
+    'airbnb-base',
+    'plugin:vue/essential',
+    'plugin:vue/vue3-recommended',
+    'plugin:nuxt/recommended',
   ],
+  parser: 'vue-eslint-parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -18,5 +22,21 @@ module.exports = {
     'react',
   ],
   rules: {
+    'no-console': 'off',
+    'no-underscore-dangle': [
+      'error',
+      {
+        allow: [
+          '_id',
+        ],
+      },
+    ],
+  },
+  settings: {
+    'import/resolver': {
+      nuxt: {
+        extensions: ['.js', '.vue'],
+      },
+    },
   },
 };

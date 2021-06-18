@@ -3,37 +3,37 @@ const Card = require('../models/cards');
 module.exports.getAllCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(err => res.status(500).send({message: `Ошибка ${err}`}))
-}
+    .catch((err) => res.status(500).send({ message: `Ошибка ${err}` }));
+};
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link })
-    .then( card => res.send(card))
-    .catch(err => {
+    .then((card) => res.send(card))
+    .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно'})
+        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
       }
-      return res.status(500).send({message: `Ошибка ${err}`})
-    })
-}
+      return res.status(500).send({ message: `Ошибка ${err}` });
+    });
+};
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if(card === null || undefined) {
-        return res.status(404).send({ message: ''})
+      if (!card) {
+        return res.status(404).send({ message: 'Карта не найдена' });
       }
-      return res.send(card)
+      return res.send(card);
     })
-    .catch(err => {
-      if(err.name === 'CastError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Ошибка валидации.' });
       }
-      return res.status(500).send({message: `Ошибка ${err}`})
-    })
-}
+      return res.status(500).send({ message: `Ошибка ${err}` });
+    });
+};
 
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
@@ -42,18 +42,18 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      if(card === null) {
-        return res.status(400).send({ message: 'Некоректные данные'});
+      if (card === null) {
+        return res.status(400).send({ message: 'Некоректные данные' });
       }
-      return res.send({ data: card})
+      return res.send({ data: card });
     })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({message: 'Некорректные данные'});
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Некорректные данные' });
       }
-      return res.status(500).send({message: `Ошибка ${err}`})
-    })
-}
+      return res.status(500).send({ message: `Ошибка ${err}` });
+    });
+};
 
 module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
@@ -62,8 +62,10 @@ module.exports.dislikeCard = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      if (card) {
-        res.send({ data: card });
+      if (!card) {
+        return res.status(400).send({ message: 'Некоректные данные' });
       }
+      return res.send({ data: card });
     })
-    .catch(next);}
+    .catch(next);
+};
