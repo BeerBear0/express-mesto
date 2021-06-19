@@ -42,8 +42,8 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => {
-      if (card === null) {
-        return res.status(400).send({ message: 'Некоректные данные' });
+      if (!card) {
+        return res.status(404).send({ message: 'Карта не найдена' });
       }
       return res.send({ data: card });
     })
@@ -55,7 +55,7 @@ module.exports.likeCard = (req, res) => {
     });
 };
 
-module.exports.dislikeCard = (req, res, next) => {
+module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -63,9 +63,14 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(400).send({ message: 'Некоректные данные' });
+        return res.status(404).send({ message: 'Некоректные данные' });
       }
       return res.send({ data: card });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Некоректные данные' });
+      }
+      return res.status(500).send({ message: `Ошибка ${err}` });
+    });
 };
