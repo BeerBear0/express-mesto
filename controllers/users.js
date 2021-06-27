@@ -1,4 +1,20 @@
 const User = require('../models/users');
+const bcrypt = require('bcrypt');
+const validator = require('validator')
+const isEmail = require('validator/lib/isEmail');
+const jwt = require('jsonwebtoken');
+
+const errorsMessage = {
+  400: 'Переданы некорректные данные при создании пользователя',
+  '400login': 'Не заполнены все поля',
+  '400user': 'Переданы некорректные данные при обновлении профиля',
+  '400ava': 'Переданы некорректные данные при обновлении аватара',
+  401: 'Логин или пароль не правильные',
+  404: 'Пользователь по указанному _id не найден',
+  '404email': 'Пользователь с такой почтой не найден',
+  409: 'Пользователь c такой почтой уже существует',
+};
+
 
 // Поиск всех юзеров
 module.exports.getAllUsers = (req, res) => {
@@ -25,19 +41,53 @@ module.exports.getUserById = (req, res) => {
 };
 
 // Создание нового пользователя
-module.exports.createUser = (req, res) => {
-  console.log(res.user._id);
-  const { name, about, avatar } = req.body;
-
-  User.create({ name, about, avatar })
-    .then((user) => res.send(user))
+module.exports.createUser = (req, res, next) => {
+  const {
+    name, about, avatar, password, email,
+  } = req.body;
+  if (!email || !password) {
+    next(new RequestError(errorsMessage[400]));
+  }
+  return bcrypt.hash(password, 8, (err, hash) => User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        next(new AlreadyHaveError(errorsMessage[409]));
+      }
+      return User.create({
+        name, about, avatar, password: hash, email,
+      })
+        .then(() => res.status(200).send({
+          data: {
+            name, about, avatar, email,
+          },
+        }));
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
+        next(new RequestError(errorsMessage[400]));
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
-    });
+      if (err.name === 'CastError') {
+        next(new NotFoundError(errorsMessage[404]));
+      }
+      next(err);
+    }));
 };
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  if(!email || !password) {
+    next(new RequestError(errorsMessage['400login']))
+  }
+  return User.findOne({ email }.select('+password'))
+    .then(user => {
+      next( new NotFoundError(errorsMessage[401]))
+    })
+
+  const token = jwt.sign({ id: user.id}, 'some-secret-key', {expiresIn: '7d'})
+
+  return res.status(200).send({ id: user.id, token})
+}
 
 module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
