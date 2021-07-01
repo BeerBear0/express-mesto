@@ -7,11 +7,13 @@ const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
 const AuthError = require('../errors/AuthError');
 
+const { JWT_SECRET = 'some-secret-key' } = process.env;
+
 // Поиск всех юзеров
-module.exports.getAllUsers = (req, res) => {
+module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: `Ошибка ${err}` }));
+    .catch(next)
 };
 
 // Поиск 1го юзера по id
@@ -27,7 +29,7 @@ module.exports.getUserById = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new ValidationError('Id пользователя имеет не коректный формат'));
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
+      next(err)
     });
 };
 
@@ -85,7 +87,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        JWT_SECRET,
         { expiresIn: '7d' },
       );
       res
@@ -110,7 +112,7 @@ module.exports.updateProfile = (req, res, next) => {
       if (err === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при редактировании пользователя'));
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
+      next(err)
     });
 };
 
@@ -124,7 +126,7 @@ module.exports.updateAvatar = (req, res, next) => {
       if (err === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при редактировании пользователя'));
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
+     next(err)
     });
 };
 
