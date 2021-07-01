@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-
+const auth = require('./middlewares/auth')
 const { login, createUser} = require('./controllers/users')
 
 const app = express();
@@ -20,13 +20,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.post('/signin', login);
 app.post('/signup', createUser)
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '60cb1868f3fc3c457851d719', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
-
-  next();
-});
+app.use(auth)
 
 app.use('/', require('./routes/index'));
 

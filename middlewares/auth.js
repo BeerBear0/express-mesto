@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 function handleAuthError(res) {
     res
-      .status(401)
+      .status(403)
       .send ({ message: 'Необходиа авторизация '})
 }
 

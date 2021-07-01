@@ -20,7 +20,7 @@ const errorsMessage = {
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: `Ошибка ${err}` }));
+    .catch((err) => res.status(500).send(errorsMessage[500]));
 };
 
 // Поиск 1го юзера по id
@@ -28,15 +28,15 @@ module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь по данному ID не найден' });
+        return res.status(404).send(errorsMessage[404]);
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
+        return res.status(400).send(errorsMessage[400]);
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
+      return res.status(500).send(errorsMessage[500]);
     });
 };
 
@@ -98,13 +98,13 @@ module.exports.updateProfile = (req, res) => {
       if (user) {
         return res.status(200).send({ data: user });
       }
-      return res.status(404).send({ message: 'Пользователь по данному ID не найден' });
+      return res.status(404).send(errorsMessage[404]);
     })
     .catch((err) => {
       if (err === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
+        return res.status(400).send(errorsMessage[400]);
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
+      return res.status(500).send(errorsMessage[500]);
     });
 };
 
@@ -117,12 +117,18 @@ module.exports.updateAvatar = (req, res) => {
       if (user) {
         return res.status(200).send({ data: user });
       }
-      return res.status(404).send({ message: 'Пользователь по данному ID не найден' });
+      return res.status(404).send(errorsMessage[404]);
     })
     .catch((err) => {
       if (err === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
+        return res.status(400).send(errorsMessage[400]);
       }
-      return res.status(500).send({ message: `Ошибка ${err}` });
+      return res.status(500).send(errorsMessage[500]);
     });
 };
+
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then(user => res.send(user))
+    .catch(err =>  next(err))
+}
