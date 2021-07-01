@@ -1,41 +1,51 @@
 const Card = require('../models/cards');
 
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const ValidationError = require('../errors/ValidationError');
+
 module.exports.getAllCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
     .catch((err) => res.status(500).send({ message: `Ошибка ${err}` }));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Ошибка валидации. Заполните форму правильно' });
+        next(new ValidationError('Заполните форму правильно'))
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карта не найдена' });
+        next(new NotFoundError('Карта не найдена'))
       }
-      return res.send(card);
+      if (card.owner.equals(req.user.id)) {
+        Card.findByIdAndRemove(card._id)
+          .then((cards) => res.send(cards));
+      }
+      else {
+        next(new ForbiddenError('Карточку может удолить только создатель'))
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Ошибка валидации.' });
+        next(new ValidationError('Ошибка валидации'))
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -43,19 +53,19 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карта не найдена' });
+        next(new NotFoundError('Карта не найдена'))
       }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Некорректные данные' });
+        next(new ValidationError('Некоректные данные'))
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -63,13 +73,13 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карта не найдена' });
+        next(new NotFoundError('Карта не найдена'))
       }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Некоректные данные' });
+       next(new ValidationError('Некоректные данные '))
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
