@@ -17,7 +17,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Заполните форму правильно'))
+        next(new ValidationError('Заполните форму правильно'));
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
@@ -27,19 +27,18 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карта не найдена'))
+        next(new NotFoundError('Карта не найдена'));
       }
       if (card.owner.equals(req.user.id)) {
         Card.findByIdAndRemove(card._id)
           .then((cards) => res.send(cards));
-      }
-      else {
-        next(new ForbiddenError('Карточку может удолить только создатель'))
+      } else {
+        next(new ForbiddenError('Карточку может удолить только создатель'));
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError('Ошибка валидации'))
+        next(new ValidationError('Ошибка валидации'));
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
@@ -53,13 +52,13 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карта не найдена'))
+        next(new NotFoundError('Карта не найдена'));
       }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError('Некоректные данные'))
+        next(new ValidationError('Некоректные данные'));
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });
@@ -73,13 +72,13 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карта не найдена'))
+        next(new NotFoundError('Карта не найдена'));
       }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-       next(new ValidationError('Некоректные данные '))
+        next(new ValidationError('Некоректные данные '));
       }
       return res.status(500).send({ message: `Ошибка ${err}` });
     });

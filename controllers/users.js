@@ -1,18 +1,17 @@
-const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const User = require('../models/users');
 
 const NotFoundError = require('../errors/NotFoundError');
 const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
-const AuthError = require('../errors/AuthError')
-
+const AuthError = require('../errors/AuthError');
 
 // Поиск всех юзеров
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({message: `Ошибка ${err}`}));
+    .catch((err) => res.status(500).send({ message: `Ошибка ${err}` }));
 };
 
 // Поиск 1го юзера по id
@@ -20,15 +19,15 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь по данному Id не найден'))
+        next(new NotFoundError('Пользователь по данному Id не найден'));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new ValidationError('Id пользователя имеет не коректный формат'))
+        next(new ValidationError('Id пользователя имеет не коректный формат'));
       }
-      return res.status(500).send({ message: `Ошибка ${err}`});
+      return res.status(500).send({ message: `Ошибка ${err}` });
     });
 };
 
@@ -54,7 +53,7 @@ module.exports.createUser = (req, res, next) => {
           },
         }));
     })
-    .catch((err) => {
+    .catch(() => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы не коректные данные'));
       }
@@ -86,7 +85,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-         'some-secret-key',
+        'some-secret-key',
         { expiresIn: '7d' },
       );
       res
@@ -99,23 +98,19 @@ module.exports.login = (req, res, next) => {
         .send({ token });
     })
     .catch(next);
-}
+};
 
 module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   const owner = req.user._id;
 
   User.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
-    .then((user) => {
-      if (user) {
-        return res.status(200).send({ data: user });
-      }
-    })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при редактировании пользователя'));
       }
-      return res.status(500).send({ message: `Ошибка ${err}`});
+      return res.status(500).send({ message: `Ошибка ${err}` });
     });
 };
 
@@ -124,15 +119,22 @@ module.exports.updateAvatar = (req, res, next) => {
   const owner = req.user._id;
 
   User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
-    .then((user) => {
-      if (user) {
-        return res.status(200).send({ data: user });
-      }
-    })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при редактировании пользователя'));
       }
-      return res.status(500).send({ message: `Ошибка ${err}`});
+      return res.status(500).send({ message: `Ошибка ${err}` });
     });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user)
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Поьзоваель не найден'));
+      }
+      res.send(user);
+    })
+    .catch(next);
 };

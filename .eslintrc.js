@@ -6,11 +6,8 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'airbnb-base',
-    'plugin:vue/essential',
-    'plugin:vue/vue3-recommended',
     'plugin:nuxt/recommended',
   ],
-  parser: 'vue-eslint-parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -18,9 +15,6 @@ module.exports = {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  plugins: [
-    'react',
-  ],
   rules: {
     'no-console': 'off',
     'no-underscore-dangle': [
@@ -35,7 +29,7 @@ module.exports = {
   settings: {
     'import/resolver': {
       nuxt: {
-        extensions: ['.js', '.vue'],
+        extensions: ['.js'],
       },
     },
   },
