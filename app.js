@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const auth = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
+const { errors, celebrate, Joi } = require('celebrate');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -17,12 +18,27 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(8)
+  })
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().max(30).min(2),
+    about: Joi.string().max(30).min(2),
+    avatar: Joi.string().pattern(/^((http|https):\/\/)(www\.)?([\w\W\d]{1,})(\.)([a-zA-Z]{1,10})([\w\W\d]{1,})?$/),
+    email: Joi.string().email().required(),
+    password: Joi.string().required().pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).*$/).min(8),
+  }).unknown(true)
+}), createUser);
 
 app.use(auth);
 
 app.use('/', require('./routes/index'));
+
+app.use(errors())
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;

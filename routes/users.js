@@ -8,14 +8,6 @@ const {
 
 router.get('/users',getAllUsers);
 
-router.get('/users/:userId',
-   celebrate( {
-     body: Joi.object().keys({
-       _id: Joi.string().length(24).hex(),
-     })
-   }),
-   getUserById);
-
 router.get('/users/me',
   celebrate({
     body: Joi.object().keys({
@@ -23,6 +15,15 @@ router.get('/users/me',
       about: Joi.string().required().max(30).min(2),
     })
   }), getCurrentUser);
+
+router.get('/users/:userId',
+  celebrate( {
+    body: Joi.object().keys({
+      _id: Joi.string().length(24).hex(),
+    })
+  }),
+  getUserById);
+
 router.patch('/users/me',
   celebrate({
     body: Joi.object().keys({

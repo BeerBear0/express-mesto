@@ -53,9 +53,10 @@ module.exports.createUser = (req, res, next) => {
           data: {
             name, about, avatar, email,
           },
+
         }));
     })
-    .catch(() => {
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы не коректные данные'));
       }
@@ -90,14 +91,7 @@ module.exports.login = (req, res, next) => {
         JWT_SECRET,
         { expiresIn: '7d' },
       );
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          secure: true,
-          sameSite: 'none',
-        })
-        .send({ token });
+      res.send({ token });
     })
     .catch(next);
 };
