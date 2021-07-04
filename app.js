@@ -30,7 +30,7 @@ app.post('/signup', celebrate({
     about: Joi.string().max(30).min(2),
     avatar: Joi.string().pattern(/^((http|https):\/\/)(www\.)?([\w\W\d]{1,})(\.)([a-zA-Z]{1,10})([\w\W\d]{1,})?$/),
     email: Joi.string().email().required(),
-    password: Joi.string().required().pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).*$/).min(8),
+    password: Joi.string().required().min(8),
   }).unknown(true),
 }), createUser);
 
@@ -40,7 +40,7 @@ app.use('/', require('./routes/index'));
 
 app.use(errors());
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({
     message: statusCode === 500 ? 'На сервере произошла ошибка' : message,

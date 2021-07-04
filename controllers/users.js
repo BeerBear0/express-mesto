@@ -41,21 +41,22 @@ module.exports.createUser = (req, res, next) => {
   if (!email || !password) {
     next(new ValidationError('Переданы некорректные данные при создании пользователя'));
   }
-  return bcrypt.hash(password, 8, (hash) => User.findOne({ email })
+  User.findOne({ email })
     .then((user) => {
       if (user) {
-        next(new ConflictError('Пользователь c такой почтой уже существует'));
+        throw new ConflictError('Пользователь с данным email уже существует');
+      } else {
+        return bcrypt.hash(password, 10);
       }
-      return User.create({
-        name, about, avatar, password: hash, email,
-      })
-        .then(() => res.status(200).send({
-          data: {
-            name, about, avatar, email,
-          },
-
-        }));
     })
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then(() => res.status(200).send({
+      data: {
+        name, about, password, email,
+      },
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы не коректные данные'));
@@ -64,7 +65,7 @@ module.exports.createUser = (req, res, next) => {
         next(new ConflictError('Такой пользователь уже существует'));
       }
       next(err);
-    }));
+    });
 };
 
 module.exports.login = (req, res, next) => {
