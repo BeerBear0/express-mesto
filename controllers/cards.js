@@ -7,7 +7,7 @@ const ValidationError = require('../errors/ValidationError');
 module.exports.getAllCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(next)
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -19,21 +19,21 @@ module.exports.createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Заполните форму правильно'));
       }
-      next(err)
+      next(err);
     });
 };
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .orFail(new NotFoundError('Карточка не найдена'))
-    .then(card => {
-      if(card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Вы не можете удалить не свою карточку')
+    .then((card) => {
+      if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Вы не можете удалить не свою карточку');
       }
       card.remove()
-        .then(() => res.send({ message: 'Карточка удалена' }))
+        .then(() => res.send({ message: 'Карточка удалена' }));
     })
-    .catch(next)
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -52,7 +52,7 @@ module.exports.likeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Некоректные данные'));
       }
-      next(err)
+      next(err);
     });
 };
 
@@ -72,6 +72,6 @@ module.exports.dislikeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Некоректные данные '));
       }
-      next(err)
+      next(err);
     });
 };

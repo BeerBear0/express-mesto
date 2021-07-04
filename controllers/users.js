@@ -13,7 +13,7 @@ const { JWT_SECRET = 'some-secret-key' } = process.env;
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(next)
+    .catch(next);
 };
 
 // Поиск 1го юзера по id
@@ -29,7 +29,7 @@ module.exports.getUserById = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new ValidationError('Id пользователя имеет не коректный формат'));
       }
-      next(err)
+      next(err);
     });
 };
 
@@ -41,7 +41,7 @@ module.exports.createUser = (req, res, next) => {
   if (!email || !password) {
     next(new ValidationError('Переданы некорректные данные при создании пользователя'));
   }
-  return bcrypt.hash(password, 8, (err, hash) => User.findOne({ email })
+  return bcrypt.hash(password, 8, (hash) => User.findOne({ email })
     .then((user) => {
       if (user) {
         next(new ConflictError('Пользователь c такой почтой уже существует'));
@@ -106,7 +106,7 @@ module.exports.updateProfile = (req, res, next) => {
       if (err === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при редактировании пользователя'));
       }
-      next(err)
+      next(err);
     });
 };
 
@@ -120,7 +120,7 @@ module.exports.updateAvatar = (req, res, next) => {
       if (err === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при редактировании пользователя'));
       }
-     next(err)
+      next(err);
     });
 };
 
