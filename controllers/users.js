@@ -7,7 +7,7 @@ const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
 const AuthError = require('../errors/AuthError');
 
-const { JWT_SECRET = 'some-secret-key' } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // Поиск всех юзеров
 module.exports.getAllUsers = (req, res, next) => {
@@ -59,7 +59,7 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы не коректные данные'));
+        next(new ValidationError('Переданы не корректные данные'));
       }
       if (err.code === 11000) {
         next(new ConflictError('Такой пользователь уже существует'));
@@ -89,7 +89,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        JWT_SECRET,
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev_secret',
         { expiresIn: '7d' },
       );
       res.send({ token });

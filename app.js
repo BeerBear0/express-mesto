@@ -2,11 +2,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors, celebrate, Joi } = require('celebrate');
+const cors = require('cors');
 const auth = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
+const { requestLogger, errorLoger } = require('./middlewares/logger');
 
 const app = express();
 const { PORT = 3000 } = process.env;
+app.use(cors());
+
+require('dotenv').config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,6 +21,14 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useCreateIndex: true,
   useFindAndModify: false,
   useUnifiedTopology: true,
+});
+
+app.use(requestLogger);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Осторожно сервер падает!');
+  }, 0);
 });
 
 app.post('/signin', celebrate({
@@ -37,6 +50,8 @@ app.post('/signup', celebrate({
 app.use(auth);
 
 app.use('/', require('./routes/index'));
+
+app.use(errorLoger);
 
 app.use(errors());
 
