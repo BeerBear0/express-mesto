@@ -70,7 +70,6 @@ module.exports.createUser = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
   return User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
@@ -94,7 +93,10 @@ module.exports.login = (req, res, next) => {
       );
       res.send({ token });
     })
-    .catch(next);
+    .catch(err => {
+      console.log(err);
+      next(err);
+    });
 };
 
 module.exports.updateProfile = (req, res, next) => {
@@ -129,7 +131,7 @@ module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Поьзоваель не найден'));
+        next(new NotFoundError('Пользователь не найден'));
       }
       res.send(user);
     })

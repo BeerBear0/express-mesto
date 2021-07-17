@@ -30,7 +30,7 @@ app.use(allowedCors);
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Осторожно сервер падает!');
-  }, 0);
+  }, 2);
 });
 
 app.post('/signin', celebrate({

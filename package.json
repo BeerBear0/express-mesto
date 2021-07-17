@@ -8,7 +8,8 @@
     "lintfix": "eslint --fix --ext .js, --ignore-path .gitignore .",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "jest"
+    "test": "jest",
+    "deploy": "scp -r ./middlewares/* nikko_00@84.201.173.227:/home/nikko_00/express-mesto/middlewares/ && scp -r ./app.js nikko_00@84.201.173.227:/home/nikko_00/express-mesto"
   },
   "repository": {
     "type": "git",
